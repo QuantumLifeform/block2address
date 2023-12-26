@@ -1,0 +1,35 @@
+import requests
+
+def get_addresses_in_blocks(start_block, end_block):
+    addresses = set()
+
+    for block_number in range(start_block, end_block + 1):
+        url = f"https://blockchain.info/block/{block_number}?format=json"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            block_data = response.json()
+            for tx in block_data["tx"]:
+                for output in tx["out"]:
+                    if "addr" in output:
+                        addresses.add(output["addr"])
+
+    return addresses
+
+def save_addresses_to_file(addresses, file_path):
+    with open(file_path, "w") as file:
+        for address in addresses:
+            file.write(f"{address}\n")
+
+if __name__ == "__main__":
+    start_block = int(input("Podaj początkowy numer bloku: "))
+    end_block = int(input("Podaj końcowy numer bloku: "))
+
+    addresses = get_addresses_in_blocks(start_block, end_block)
+
+    if addresses:
+        file_path = "D:\\adresy.txt"
+        save_addresses_to_file(addresses, file_path)
+        print(f"Adresy zostały zapisane do pliku: {file_path}")
+    else:
+        print("Brak adresów do zapisania.")
